@@ -87,6 +87,7 @@ void RenderDXR::initialize(const int fb_width, const int fb_height)
     ray_stats_readback_buf = dxr::Buffer::readback(device.Get(),
                                                    ray_stats.linear_row_pitch() * fb_height,
                                                    D3D12_RESOURCE_STATE_COPY_DEST);
+    ray_counts.resize(ray_stats.dims().x * ray_stats.dims().y, 0);
 #endif
 
     if (rt_pipeline.get()) {
@@ -430,7 +431,6 @@ RenderStats RenderDXR::render(const glm::vec3 &pos,
     }
 
 #ifdef REPORT_RAY_STATS
-    std::vector<uint16_t> ray_counts(ray_stats.dims().x * ray_stats.dims().y, 0);
     if (ray_stats.linear_row_pitch() == ray_stats.dims().x * ray_stats.pixel_size()) {
         std::memcpy(
             ray_counts.data(), ray_stats_readback_buf.map(), ray_stats_readback_buf.size());
@@ -597,12 +597,16 @@ void RenderDXR::build_shader_binding_table()
 
         // Is writing the descriptor heap handle actually needed? It seems to not matter
         // if this is written or not
-        // TODO: Maybe this is the index in the list of heaps we bind at render time to use?
-        // Will it find the sampler heap properly if we just have nothing bound here?
-        // D3D12_GPU_DESCRIPTOR_HANDLE desc_heap_handle =
-        //	raygen_desc_heap->GetGPUDescriptorHandleForHeapStart();
-        // std::memcpy(map + sig->descriptor_table_offset(), &desc_heap_handle,
-        //	sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
+        D3D12_GPU_DESCRIPTOR_HANDLE desc_heap_handle =
+            raygen_desc_heap->GetGPUDescriptorHandleForHeapStart();
+        std::memcpy(map + sig->offset("cbv_srv_uav_heap"),
+                    &desc_heap_handle,
+                    sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
+
+        desc_heap_handle = raygen_sampler_heap->GetGPUDescriptorHandleForHeapStart();
+        std::memcpy(map + sig->offset("sampler_heap"),
+                    &desc_heap_handle,
+                    sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
     }
     for (size_t i = 0; i < scene_bvh.num_instances(); ++i) {
         const auto &inst = scene_bvh.instances[i];

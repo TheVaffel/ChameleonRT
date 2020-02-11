@@ -195,14 +195,12 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 {
     ImGuiIO &io = ImGui::GetIO();
 
-#if ENABLE_DXR
+#ifdef ENABLE_DXR
     DXDisplay *dx_display = dynamic_cast<DXDisplay *>(display);
 #endif
-
-#if ENABLE_VULKAN
+#ifdef ENABLE_VULKAN
     VKDisplay *vk_display = dynamic_cast<VKDisplay *>(display);
 #endif
-    
     GLDisplay *gl_display = dynamic_cast<GLDisplay *>(display);
     bool display_is_native = false;
 
@@ -256,7 +254,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 #endif
 #if ENABLE_OPTIX
         else if (args[i] == "-optix") {
-            renderer = std::make_unique<RenderOptiX>();
+            display_is_native = gl_display != nullptr;
+            renderer = std::make_unique<RenderOptiX>(display_is_native);
             backend_arg = args[i];
         }
 #endif
@@ -516,24 +515,24 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 
         if (display_is_native) {
             // We know what the renderer must be, so skip dynamic cast check
-#if ENABLE_DXR
+#ifdef ENABLE_DXR
             if (dx_display) {
                 RenderDXR *render_dx = reinterpret_cast<RenderDXR *>(renderer.get());
                 dx_display->display_native(render_dx->render_target);
-
             }
 #endif
-	    
-#if ENABLE_VULKAN
-	    if (vk_display) {
+#ifdef ENABLE_VULKAN
+            if (vk_display) {
                 RenderVulkan *render_vk = reinterpret_cast<RenderVulkan *>(renderer.get());
                 vk_display->display_native(render_vk->render_target);
             }
 #endif
-	    
-	    if (gl_display) {
-                throw std::runtime_error("OptiX-GL interop todo!");
+#ifdef ENABLE_OPTIX
+            if (gl_display) {
+                RenderOptiX *render_ox = reinterpret_cast<RenderOptiX *>(renderer.get());
+                gl_display->display_native(render_ox->display_texture);
             }
+#endif
         } else {
             display->display(renderer->img);
         }

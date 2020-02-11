@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optix.h>
+#include "display/gl_core_4_5.h"
 #include "optix_utils.h"
 #include "render_backend.h"
 
@@ -25,7 +26,15 @@ struct RenderOptiX : RenderBackend {
     int width, height;
     uint32_t frame_id = 0;
 
-    RenderOptiX();
+    bool native_display = false;
+    GLuint display_texture = -1;
+    cudaGraphicsResource_t cu_display_texture;
+
+#ifdef REPORT_RAY_STATS
+    std::vector<uint16_t> ray_counts;
+#endif
+
+    RenderOptiX(bool native_display);
     ~RenderOptiX();
 
     std::string name() override;
