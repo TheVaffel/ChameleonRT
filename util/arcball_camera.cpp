@@ -15,12 +15,39 @@ ArcballCamera::ArcballCamera(const glm::vec3 &eye, const glm::vec3 &center, cons
     glm::vec3 y_axis = glm::normalize(glm::cross(x_axis, z_axis));
     x_axis = glm::normalize(glm::cross(z_axis, y_axis));
 
-    center_translation = glm::inverse(glm::translate(center));
+    // center_translation = glm::inverse(glm::translate(center));
+
+    center_translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
     translation = glm::translate(glm::vec3(0.f, 0.f, -glm::length(dir)));
     rotation = glm::normalize(glm::quat_cast(glm::transpose(glm::mat3(x_axis, y_axis, -z_axis))));
 
     update_camera();
 }
+
+void ArcballCamera::setTrans(const glm::vec3& p) {
+    translation = glm::translate(p);
+    update_camera();
+}
+
+void ArcballCamera::setTransform(const glm::mat4& m) {
+    camera = m;
+    inv_camera = glm::inverse(camera);
+}
+
+void ArcballCamera::setDir(const glm::vec3& dir) {
+    using namespace glm;
+    vec3 up = vec3(0, 1, 0);
+    vec3 z_axis = normalize(dir);
+
+    vec3 x_axis = normalize(cross(z_axis, up));
+    vec3 y_axis = normalize(cross(x_axis, z_axis));
+
+    x_axis = normalize(cross(z_axis, y_axis));
+    rotation = normalize(quat_cast(transpose(mat3(x_axis, y_axis, -z_axis))));
+    
+    update_camera();
+}
+
 void ArcballCamera::rotate(glm::vec2 prev_mouse, glm::vec2 cur_mouse)
 {
     // Clamp mouse positions to stay in NDC
@@ -76,7 +103,8 @@ glm::vec3 ArcballCamera::center() const
 }
 void ArcballCamera::update_camera()
 {
-    camera = translation * glm::mat4_cast(rotation) * center_translation;
+    // camera = translation * glm::mat4_cast(rotation) * center_translation;
+    camera = glm::mat4_cast(rotation) * translation;
     inv_camera = glm::inverse(camera);
 }
 

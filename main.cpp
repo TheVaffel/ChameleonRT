@@ -5,6 +5,8 @@
 #include <numeric>
 #include <sstream>
 #include <vector>
+#include <iomanip>
+
 #include <SDL.h>
 #include "arcball_camera.h"
 #include "imgui.h"
@@ -34,6 +36,8 @@
 #include "vulkan/vkdisplay.h"
 #endif
 
+#include "pathread.hpp"
+
 const std::string USAGE =
     "Usage: <backend> <obj_file> [options]\n"
     "Backends:\n"
@@ -60,12 +64,25 @@ const std::string USAGE =
     "\t-camera <n>            If the scene contains multiple cameras, specify which\n"
     "\t                       should be used. Defaults to the first camera\n"
     "\t-img <x> <y>           Specify the window dimensions. Defaults to 1280x720\n"
+    "\t-path <path_file>      Run path mode, recording a path defined in <path_file>\n"
     "\n";
 
 int win_width = 1280;
 int win_height = 720;
 
 void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *display);
+
+/* void follow_path(std::string& pathfilename) {
+    std::vector<glm::mat4> views = getPath(pathfilename);
+
+    ArcballCamera cam(glm::vec3(0.f, 0.f, 0.f),
+		      glm::vec3(1.f, 0.f, 0.f),
+		      glm::vec3(0.f, 1.f, 0.f));
+    
+    for(int i = 0; i < views.size(); i++) {
+	cam.setTransform(views[i]);
+    }
+    } */
 
 glm::vec2 transform_mouse(glm::vec2 in)
 {
@@ -92,8 +109,15 @@ int main(int argc, const char **argv)
     // Determine which display frontend we should use
     std::string display_frontend = "gl";
     uint32_t window_flags = SDL_WINDOW_RESIZABLE;
+    std::string path_file = "";
 
     for (size_t i = 0; i < args.size(); ++i) {
+
+	if (args[i] == "-path") {
+	    path_file = args[++i];
+	    
+	}
+	
         if (args[i] == "-img") {
             win_width = std::stoi(args[++i]);
             win_height = std::stoi(args[++i]);
@@ -113,65 +137,72 @@ int main(int argc, const char **argv)
         }
 #endif
     }
+    
 
-    if (display_frontend == "gl") {
-        window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
+	if (display_frontend == "gl") {
+	    window_flags = SDL_WINDOW_OPENGL;
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-        // Create window with graphics context
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    }
+	    // Create window with graphics context
+	    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	}
 
-    SDL_Window *window = SDL_CreateWindow("ChameleonRT",
-                                          SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          win_width,
-                                          win_height,
-                                          window_flags);
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
+	SDL_Window *window = SDL_CreateWindow("ChameleonRT",
+					      SDL_WINDOWPOS_CENTERED,
+					      SDL_WINDOWPOS_CENTERED,
+					      win_width,
+					      win_height,
+					      window_flags);
+    
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
 
-    {
-        std::unique_ptr<Display> display;
-        if (display_frontend == "gl") {
-            display = std::make_unique<GLDisplay>(window);
-        }
+	{
+	    std::unique_ptr<Display> display;
+	    if (display_frontend == "gl") {
+		display = std::make_unique<GLDisplay>(window);
+	    }
 #ifdef ENABLE_DXR
-        else if (display_frontend == "dx") {
-            display = std::make_unique<DXDisplay>(window);
-        }
+	    else if (display_frontend == "dx") {
+		display = std::make_unique<DXDisplay>(window);
+	    }
 #endif
 #ifdef ENABLE_VULKAN
-        else if (display_frontend == "vk") {
-            display = std::make_unique<VKDisplay>(window);
-        }
+	    else if (display_frontend == "vk") {
+		display = std::make_unique<VKDisplay>(window);
+	    }
 #endif
+	    run_app(args, window, display.get());
+	}
 
-        run_app(args, window, display.get());
-    }
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    return 0;
+	return 0;
 }
 
 void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *display)
 {
     ImGuiIO &io = ImGui::GetIO();
 
+#if ENABLE_DXR
     DXDisplay *dx_display = dynamic_cast<DXDisplay *>(display);
+#endif
+
+#if ENABLE_VULKAN
     VKDisplay *vk_display = dynamic_cast<VKDisplay *>(display);
+#endif
+    
     GLDisplay *gl_display = dynamic_cast<GLDisplay *>(display);
     bool display_is_native = false;
 
@@ -181,10 +212,14 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     glm::vec3 eye(0, 0, 5);
     glm::vec3 center(0);
     glm::vec3 up(0, 1, 0);
-    float fov_y = 65.f;
+    float fov_y = 45.f;
     size_t camera_id = 0;
     std::string backend_arg;
     std::string validation_img_prefix;
+    std::string path_file = "";
+    bool doing_path = false;
+    std::vector<glm::mat4> path_views;
+    
     for (size_t i = 1; i < args.size(); ++i) {
         if (args[i] == "-eye") {
             eye.x = std::stof(args[++i]);
@@ -208,7 +243,11 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
             camera_id = std::stol(args[++i]);
         } else if (args[i] == "-validation") {
             validation_img_prefix = args[++i];
-        }
+        } else if (args[i] == "-path") {
+	    path_file = args[++i];
+	    doing_path = true;
+	    path_views = getPath(path_file);
+	}
 #if ENABLE_OSPRAY
         else if (args[i] == "-ospray") {
             renderer = std::make_unique<RenderOSPRay>();
@@ -299,6 +338,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     }
 
     ArcballCamera camera(eye, center, up);
+    // Camera camera;
 
     const std::string rt_backend = renderer->name();
     const std::string cpu_brand = get_cpu_brand();
@@ -306,6 +346,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     const std::string image_output = "chameleonrt.png";
     const std::string display_frontend = display->name();
 
+    size_t count = 0;
     size_t frame_id = 0;
     float render_time = 0.f;
     float rays_per_second = 0.f;
@@ -316,6 +357,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     while (!done) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
+	    
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT) {
                 done = true;
@@ -377,6 +419,21 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
             }
         }
 
+	float r = 5.0f;
+
+	if (doing_path) {
+	    if(count >= path_views.size()) {
+		return;
+	    }
+	    camera.setTransform(path_views[count]);
+	} else {
+	    camera.setTrans(glm::vec3(r * sin(count / 50.f), -2.50f, 0.0f));
+	    camera.setDir(glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+	
+
+	camera_changed = true;
+	
         if (camera_changed) {
             frame_id = 0;
         }
@@ -386,6 +443,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
             camera.eye(), camera.dir(), camera.up(), fov_y, camera_changed, need_readback);
 
         ++frame_id;
+	++count;
         camera_changed = false;
 
         if (save_image) {
@@ -398,9 +456,16 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
                            renderer->img.data(),
                            4 * win_width);
         }
-        if (!validation_img_prefix.empty()) {
-            const std::string img_name =
-                validation_img_prefix + backend_arg + "-f" + std::to_string(frame_id) + ".png";
+        if (!validation_img_prefix.empty() || doing_path) {
+	    std::string img_name;
+
+	    std::ostringstream oss;
+	    oss << "frame" << std::setfill('0') << std::setw(5) << count << ".png";
+	    if ( doing_path ) {
+		img_name = oss.str();
+	    } else {
+                img_name = validation_img_prefix + backend_arg + "-f" + std::to_string(frame_id) + ".png";
+	    }
             stbi_write_png(img_name.c_str(),
                            win_width,
                            win_height,
@@ -451,13 +516,22 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 
         if (display_is_native) {
             // We know what the renderer must be, so skip dynamic cast check
+#if ENABLE_DXR
             if (dx_display) {
                 RenderDXR *render_dx = reinterpret_cast<RenderDXR *>(renderer.get());
                 dx_display->display_native(render_dx->render_target);
-            } else if (vk_display) {
+
+            }
+#endif
+	    
+#if ENABLE_VULKAN
+	    if (vk_display) {
                 RenderVulkan *render_vk = reinterpret_cast<RenderVulkan *>(renderer.get());
                 vk_display->display_native(render_vk->render_target);
-            } else if (gl_display) {
+            }
+#endif
+	    
+	    if (gl_display) {
                 throw std::runtime_error("OptiX-GL interop todo!");
             }
         } else {
