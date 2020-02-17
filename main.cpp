@@ -437,7 +437,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
             frame_id = 0;
         }
 
-        const bool need_readback = save_image || !validation_img_prefix.empty();
+        const bool need_readback = save_image || !validation_img_prefix.empty() || doing_path;
         RenderStats stats = renderer->render(
             camera.eye(), camera.dir(), camera.up(), fov_y, camera_changed, need_readback);
 
@@ -459,7 +459,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    std::string img_name;
 
 	    std::ostringstream oss;
-	    oss << "frame" << std::setfill('0') << std::setw(5) << count << ".png";
+	    oss << "frame" << std::setfill('0') << std::setw(5) << (count - 1) << ".png";
+
 	    if ( doing_path ) {
 		img_name = oss.str();
 	    } else {
@@ -471,6 +472,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
                            4,
                            renderer->img.data(),
                            4 * win_width);
+	    std::cout << "Saved output to " << img_name << std::endl;
         }
 
         if (frame_id == 1) {
