@@ -37,8 +37,8 @@ glm::mat4 getInterpolatedView(const CameraCheckpoint& cc1,
     glm::vec3 x_axis = glm::normalize(glm::cross(cc.dir, up));
     glm::vec3 y_axis = glm::normalize(glm::cross(x_axis, cc.dir));
 
-    glm::mat3 rotation = glm::transpose(glm::mat3(x_axis, y_axis, -cc.dir));
-    glm::mat4 transform = glm::mat4(rotation) * glm::translate(-cc.point);
+    glm::mat3 rotation = glm::transpose(glm::mat3(x_axis, y_axis, cc.dir));
+    glm::mat4 transform = glm::mat4(rotation) * glm::translate(cc.point);
     return transform;
 }
 
