@@ -441,6 +441,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
         RenderStats stats = renderer->render(
             camera.eye(), camera.dir(), camera.up(), fov_y, camera_changed, need_readback);
 
+	// std::cout << "Rendered with camera eye " << glm::to_string(camera.eye()) << std::endl;
+	
         ++frame_id;
 	++count;
         camera_changed = false;
