@@ -64,11 +64,12 @@ set_target_properties(chameleonrt PROPERTIES
 	CXX_STANDARD 14
 	CXX_STANDARD_REQUIRED ON)
 
-target_include_directories(chameleonrt PRIVATE "~/pseudoroot/include")
+target_include_directories(chameleonrt PRIVATE "~/pseudoroot/include" "~/SDK/nlohmann/json/include")
 
 target_link_libraries(chameleonrt PUBLIC
     util
-    display)
+    display
+   )
 
 if (ENABLE_OSPRAY)
 	target_link_libraries(chameleonrt PUBLIC render_ospray)
@@ -79,7 +80,7 @@ if (ENABLE_EMBREE)
 endif()
 
 if (ENABLE_OPTIX)
-	target_link_libraries(chameleonrt PUBLIC render_optix)
+	target_link_libraries(chameleonrt PUBLIC render_optix dl)
 endif()
 
 if (ENABLE_DXR)
