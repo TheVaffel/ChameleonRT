@@ -65,6 +65,7 @@ const std::string USAGE =
     "\t                       should be used. Defaults to the first camera\n"
     "\t-img <x> <y>           Specify the window dimensions. Defaults to 1280x720\n"
     "\t-path <path_file>      Run path mode, recording a path defined in <path_file>\n"
+  "\t-output <output>       Output files with <output> as prefix\n"
     "\n";
 
 int win_width = 1280;
@@ -109,15 +110,8 @@ int main(int argc, const char **argv)
     // Determine which display frontend we should use
     std::string display_frontend = "gl";
     uint32_t window_flags = SDL_WINDOW_RESIZABLE;
-    std::string path_file = "";
 
-    for (size_t i = 0; i < args.size(); ++i) {
-
-	if (args[i] == "-path") {
-	    path_file = args[++i];
-	    
-	}
-	
+    for (size_t i = 0; i < args.size(); ++i) {	
         if (args[i] == "-img") {
             win_width = std::stoi(args[++i]);
             win_height = std::stoi(args[++i]);
@@ -215,6 +209,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     std::string backend_arg;
     std::string validation_img_prefix;
     std::string path_file = "";
+    std::string output_prefix = "frame";
+
     bool doing_path = false;
     std::vector<glm::mat4> path_views;
     
@@ -245,6 +241,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    path_file = args[++i];
 	    doing_path = true;
 	    path_views = getPath(path_file);
+	} else if (args[i] == "-output") {
+	  output_prefix = args[++i];
 	}
 #if ENABLE_OSPRAY
         else if (args[i] == "-ospray") {
@@ -461,7 +459,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    std::string img_name;
 
 	    std::ostringstream oss;
-	    oss << "frame" << std::setfill('0') << std::setw(5) << (count - 1) << ".png";
+	    oss << output_prefix << std::setfill('0') << std::setw(5) << (count - 1) << ".png";
 
 	    if ( doing_path ) {
 		img_name = oss.str();
