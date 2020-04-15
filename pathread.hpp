@@ -5,7 +5,7 @@
 
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL true
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 #include <glm/gtx/transform.hpp>
 
