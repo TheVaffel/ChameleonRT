@@ -5,7 +5,6 @@
 
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -62,7 +61,7 @@ std::vector<glm::mat4> getPath(const std::string& str) {
 
     std::vector<glm::mat4> views;
     int t = cps[0].t;
-    int current_cp = 0;
+    size_t current_cp = 0;
     while(current_cp < cps.size() - 1) {
 
 	views.push_back(getInterpolatedView(cps[current_cp], cps[current_cp + 1], t));

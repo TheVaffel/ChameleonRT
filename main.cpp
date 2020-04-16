@@ -344,6 +344,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     const std::string display_frontend = display->name();
 
     size_t count = 0;
+    const size_t count_offset = 1;
     size_t frame_id = 0;
     float render_time = 0.f;
     float rays_per_second = 0.f;
@@ -459,7 +460,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    std::string img_name;
 
 	    std::ostringstream oss;
-	    oss << output_prefix << std::setfill('0') << std::setw(5) << (count - 1) << ".png";
+	    oss << output_prefix << std::setfill('0') << std::setw(3) << (count - 1 + count_offset) << ".png";
 
 	    if ( doing_path ) {
 		img_name = oss.str();
