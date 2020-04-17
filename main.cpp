@@ -18,6 +18,8 @@
 #include "util/display/gldisplay.h"
 #include "util/display/imgui_impl_sdl.h"
 
+#define OUTPUT_INDEX_PAD 1
+
 #if ENABLE_OSPRAY
 #include "ospray/render_ospray.h"
 #endif
@@ -460,7 +462,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    std::string img_name;
 
 	    std::ostringstream oss;
-	    oss << output_prefix << std::setfill('0') << std::setw(3) << (count - 1 + count_offset) << ".png";
+	    oss << output_prefix << std::setfill('0') << std::setw(OUTPUT_INDEX_PAN) << (count - 1 + count_offset) << ".png";
 
 	    if ( doing_path ) {
 		img_name = oss.str();
