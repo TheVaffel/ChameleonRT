@@ -68,6 +68,7 @@ const std::string USAGE =
     "\t-img <x> <y>           Specify the window dimensions. Defaults to 1280x720\n"
     "\t-path <path_file>      Run path mode, recording a path defined in <path_file>\n"
   "\t-output <output>       Output files with <output> as prefix\n"
+  "\t-start <start_index>   Output index of the first frame\n"
     "\n";
 
 int win_width = 1280;
@@ -212,6 +213,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     std::string validation_img_prefix;
     std::string path_file = "";
     std::string output_prefix = "frame";
+    int start_index = 0;
 
     bool doing_path = false;
     std::vector<glm::mat4> path_views;
@@ -245,6 +247,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    path_views = getPath(path_file);
 	} else if (args[i] == "-output") {
 	  output_prefix = args[++i];
+	} else if (args[i] == "-start") {
+	  start_index = std::stoi(args[++i]);
 	}
 #if ENABLE_OSPRAY
         else if (args[i] == "-ospray") {
@@ -346,7 +350,6 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     const std::string display_frontend = display->name();
 
     size_t count = 0;
-    const size_t count_offset = 1;
     size_t frame_id = 0;
     float render_time = 0.f;
     float rays_per_second = 0.f;
@@ -462,7 +465,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    std::string img_name;
 
 	    std::ostringstream oss;
-	    oss << output_prefix << std::setfill('0') << std::setw(OUTPUT_INDEX_PAN) << (count - 1 + count_offset) << ".png";
+	    oss << output_prefix << std::setfill('0') << std::setw(OUTPUT_INDEX_PAD) << (count - 1 + start_index) << ".png";
 
 	    if ( doing_path ) {
 		img_name = oss.str();
