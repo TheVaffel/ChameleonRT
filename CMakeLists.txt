@@ -69,6 +69,7 @@ target_include_directories(chameleonrt PRIVATE "~/pseudoroot/include" "~/SDK/nlo
 target_link_libraries(chameleonrt PUBLIC
     util
     display
+    OpenImageIO
    )
 
 if (ENABLE_OSPRAY)

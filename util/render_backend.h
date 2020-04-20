@@ -10,7 +10,7 @@ struct RenderStats {
 };
 
 struct RenderBackend {
-    std::vector<uint32_t> img;
+  std::vector<float> img;
 
     virtual ~RenderBackend() {}
 

@@ -147,6 +147,8 @@ extern "C" __global__ void __raygen__perspective_camera() {
     int bounce = 0;
     float3 illum = make_float3(0.f);
     float3 path_throughput = make_float3(1.f);
+
+    float3 albedo;
     do {
         RayPayload payload = make_ray_payload();
         uint2 payload_ptr;
@@ -163,9 +165,17 @@ extern "C" __global__ void __raygen__perspective_camera() {
             illum = illum + path_throughput * payload.normal;
             break;
         }
-
+	    
+	    
         unpack_material(params.materials[payload.material_id], payload.uv, mat);
 
+	
+	/* */
+	if (bounce == 0) {
+	  albedo = mat.base_color;
+	}
+	/* */
+	
         const float3 w_o = -ray_dir;
         const float3 hit_p = ray_origin + payload.t_hit * ray_dir;
         float3 v_x, v_y;
@@ -196,15 +206,39 @@ extern "C" __global__ void __raygen__perspective_camera() {
         ++bounce;
     } while (bounce < MAX_PATH_DEPTH);
 
-    const float3 prev_color = make_float3(launch_params.accum_buffer[pixel_idx]);
+    
+    // Seems like original code did some kind of temporal smoothing.
+    // We ain't having any of that
+
+    /* const float3 prev_color = make_float3(launch_params.accum_buffer[pixel_idx]);
     const float3 accum_color = (illum + launch_params.frame_id * prev_color) / (launch_params.frame_id + 1);
     launch_params.accum_buffer[pixel_idx] = make_float4(accum_color, 1.f);
 
     launch_params.framebuffer[pixel_idx] = make_uchar4(
             clamp(linear_to_srgb(accum_color.x) * 255.f, 0.f, 255.f),
             clamp(linear_to_srgb(accum_color.y) * 255.f, 0.f, 255.f),
-            clamp(linear_to_srgb(accum_color.z) * 255.f, 0.f, 255.f), 255);
+            clamp(linear_to_srgb(accum_color.z) * 255.f, 0.f, 255.f), 255); */
 
+    /* launch_params.framebuffer[pixel_idx] = make_uchar4(
+            clamp(linear_to_srgb(illum.x) * 255.f, 0.f, 255.f),
+            clamp(linear_to_srgb(illum.y) * 255.f, 0.f, 255.f),
+            clamp(linear_to_srgb(illum.z) * 255.f, 0.f, 255.f), 255); */
+
+    float3 demodulated_illum =
+      make_float3(albedo.x > 1e-8 ? illum.x / albedo.x : 0.0f,
+		  albedo.y > 1e-8 ? illum.y / albedo.y : 0.0f,
+		  albedo.z > 1e-8 ? illum.z / albedo.z : 0.0f);
+
+    /* launch_params.framebuffer[pixel_idx] =
+      make_uchar4(clamp(linear_to_srgb(demodulated_illum.x) * 255.f, 0.f, 255.f),
+		  clamp(linear_to_srgb(demodulated_illum.y) * 255.f, 0.f, 255.f),
+		  clamp(linear_to_srgb(demodulated_illum.z) * 255.f, 0.f, 255.f), 255); */
+    launch_params.framebuffer[pixel_idx] =
+      make_float3(clamp(linear_to_srgb(demodulated_illum.x), 0.f, 1.f),
+		  clamp(linear_to_srgb(demodulated_illum.y), 0.f, 1.f),
+		  clamp(linear_to_srgb(demodulated_illum.z), 0.f, 1.f));
+							 
+    
 #ifdef REPORT_RAY_STATS
     launch_params.ray_stats_buffer[pixel_idx] = ray_count;
 #endif

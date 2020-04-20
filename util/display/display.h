@@ -15,4 +15,5 @@ struct Display {
     virtual void new_frame() = 0;
 
     virtual void display(const std::vector<uint32_t> &img) = 0;
+  virtual void display(const std::vector<float> &img) = 0;
 };

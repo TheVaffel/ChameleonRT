@@ -18,6 +18,8 @@
 #include "util/display/gldisplay.h"
 #include "util/display/imgui_impl_sdl.h"
 
+#include <OpenImageIO/imageio.h>
+
 #define OUTPUT_INDEX_PAD 1
 
 #if ENABLE_OSPRAY
@@ -137,6 +139,7 @@ int main(int argc, const char **argv)
     
 
 	if (display_frontend == "gl") {
+	  // std::cout << "Display frontend: gl" << std::endl;
 	    window_flags = SDL_WINDOW_OPENGL;
 
 	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -465,19 +468,34 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    std::string img_name;
 
 	    std::ostringstream oss;
-	    oss << output_prefix << std::setfill('0') << std::setw(OUTPUT_INDEX_PAD) << (count - 1 + start_index) << ".png";
+	    oss << output_prefix << std::setfill('0') << std::setw(OUTPUT_INDEX_PAD) << (count - 1 + start_index) <<
+	      // ".png";
+	      ".exr";
 
 	    if ( doing_path ) {
-		img_name = oss.str();
+	      img_name = oss.str();
 	    } else {
-                img_name = validation_img_prefix + backend_arg + "-f" + std::to_string(frame_id) + ".png";
+	      img_name = validation_img_prefix + backend_arg + "-f" + std::to_string(frame_id) + ".png";
 	    }
-            stbi_write_png(img_name.c_str(),
+	    
+            /* stbi_write_png(img_name.c_str(),
                            win_width,
                            win_height,
                            4,
                            renderer->img.data(),
-                           4 * win_width);
+                           4 * win_width); */
+
+	    OpenImageIO::ImageOutput *out = OpenImageIO::ImageOutput::create(img_name);
+	    if(!out) {
+	      std::cerr << "Could not create output file " << img_name << ", exiting" << std::endl;
+	      exit(-1);
+	    }
+	    
+	    OpenImageIO::ImageSpec spec(win_width, win_height, 3, OpenImageIO::TypeDesc::FLOAT);
+	    out->open(img_name, spec);
+	    out->write_image(OpenImageIO::TypeDesc::FLOAT, renderer->img.data());
+	    out->close();
+	    
 	    std::cout << "Saved output to " << img_name << std::endl;
         }
 
@@ -521,7 +539,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
         ImGui::End();
         ImGui::Render();
 
-        if (display_is_native) {
+        if (display_is_native && !need_readback) {
             // We know what the renderer must be, so skip dynamic cast check
 #ifdef ENABLE_DXR
             if (dx_display) {

@@ -39,7 +39,9 @@ struct LaunchParams {
     uint32_t frame_id;
 
 #ifdef __CUDA_ARCH__
-    uchar4 *framebuffer;
+  // uchar4 *framebuffer;
+  float3 *framebuffer;
+  // uchar4 *albedo_buffer;
     float4 *accum_buffer;
     cudaTextureObject_t *textures;
 #else

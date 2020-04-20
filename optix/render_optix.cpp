@@ -83,10 +83,10 @@ void RenderOptiX::initialize(const int fb_width, const int fb_height)
     frame_id = 0;
     width = fb_width;
     height = fb_height;
-    img.resize(fb_width * fb_height);
+    img.resize(3 * fb_width * fb_height);
 
-    framebuffer = optix::Buffer(img.size() * sizeof(uint32_t));
-    accum_buffer = optix::Buffer(img.size() * sizeof(glm::vec4));
+    framebuffer = optix::Buffer(img.size() * sizeof(float));
+    accum_buffer = optix::Buffer(img.size() * sizeof(float));
     accum_buffer.clear();
 
 #ifdef REPORT_RAY_STATS

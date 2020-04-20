@@ -93,12 +93,23 @@ void GLDisplay::new_frame()
 
 void GLDisplay::display(const std::vector<uint32_t> &img)
 {
+  std::cout << "Dislay uint" << std::endl;
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, render_texture);
     glTexSubImage2D(
         GL_TEXTURE_2D, 0, 0, 0, fb_dims.x, fb_dims.y, GL_RGBA, GL_UNSIGNED_BYTE, img.data());
 
     display_native(render_texture);
+}
+
+void GLDisplay::display(const std::vector<float> &img) {
+  std::cout << "Display float" << std::endl;
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, render_texture);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+		  fb_dims.x, fb_dims.y, GL_RGB, GL_FLOAT, img.data());
+  display_native(render_texture);
+  
 }
 
 void GLDisplay::display_native(const GLuint img)
