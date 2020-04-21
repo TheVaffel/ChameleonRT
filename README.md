@@ -1,4 +1,15 @@
+
 # ChameleonRT
+
+__Note__: The original ChameleonRT is created by Will Usher. I have made a few modifications of the code:
+- Slightly extended the command line interface
+- Enabled specification of a path for the camera to follow through the scene
+- Make images high-dynamic range, and using [EXR](https://github.com/AcademySoftwareFoundation/openexr) format
+- Demodulate albedo - that is - only register incoming light rays as if unaffected by the color of the last surface hit
+
+The last two modifications where made specifically for the Optix backend and are likely to break any other backend.
+
+Original README continues below.
 
 An example path tracer which runs on multiple ray tracing backends (Embree/DXR/OptiX/Vulkan/OSPRay).
 Uses [tinyobjloader](https://github.com/syoyo/tinyobjloader) to load OBJ files,
