@@ -362,17 +362,14 @@ void Scene::load_gltf(const std::string &fname)
     QuadLight light;
     light.emission = glm::vec4(20.f);
     light.normal = glm::vec4(glm::normalize(glm::vec3(0.0, -0.8, 0.0)), 0);
-    // light.normal = glm::vec4(glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0);
-    // light.normal = glm::vec4(glm::normalize(glm::vec3(0.0, 0.8, 0.0)), 0);
-    // light.position = -0.5f * light.normal + glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    // light.position = -2.5f * light.normal + glm::vec4(0.0f, 0.0f, -3.0f, 1.0f);
-    light.position = -5.f * light.normal;
+    
+    light.position = -2.4f * light.normal + glm::vec4(1.0, 0.0, 3.0, 0.0);
 
-    std::cout << "Position = " << light.position.x << ", " << light.position.y << ", " << light.position.z << std::endl;
+    std::cout << "Light position = " << light.position.x << ", " << light.position.y << ", " << light.position.z << std::endl;
     
     ortho_basis(light.v_x, light.v_y, glm::vec3(light.normal));
-    light.width = 5.f;
-    light.height = 5.f;
+    light.width = 2.f;
+    light.height = 2.f;
     lights.push_back(light);
 }
 
