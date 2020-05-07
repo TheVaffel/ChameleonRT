@@ -166,8 +166,8 @@ extern "C" __global__ void __raygen__perspective_camera() {
             break;
         }
 
-	launch_params.framebuffer[pixel_idx] = ray_origin + payload.t_hit * ray_dir;
-	return;
+	// launch_params.framebuffer[pixel_idx] = ray_origin + payload.t_hit * ray_dir;
+	// return;
 	    
 	    
         unpack_material(params.materials[payload.material_id], payload.uv, mat);
