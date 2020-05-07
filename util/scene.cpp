@@ -358,10 +358,18 @@ void Scene::load_gltf(const std::string &fname)
     // Does GLTF have lights in the file? If one is missing we should generate one,
     // otherwise we can load them
     std::cout << "Generating light for GLTF scene\n";
+    std::cout << "Number of lights from before: " << lights.size() << std::endl;
     QuadLight light;
     light.emission = glm::vec4(20.f);
     light.normal = glm::vec4(glm::normalize(glm::vec3(0.0, -0.8, 0.0)), 0);
+    // light.normal = glm::vec4(glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0);
+    // light.normal = glm::vec4(glm::normalize(glm::vec3(0.0, 0.8, 0.0)), 0);
+    // light.position = -0.5f * light.normal + glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    // light.position = -2.5f * light.normal + glm::vec4(0.0f, 0.0f, -3.0f, 1.0f);
     light.position = -5.f * light.normal;
+
+    std::cout << "Position = " << light.position.x << ", " << light.position.y << ", " << light.position.z << std::endl;
+    
     ortho_basis(light.v_x, light.v_y, glm::vec3(light.normal));
     light.width = 5.f;
     light.height = 5.f;

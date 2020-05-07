@@ -103,7 +103,6 @@ void GLDisplay::display(const std::vector<uint32_t> &img)
 }
 
 void GLDisplay::display(const std::vector<float> &img) {
-  std::cout << "Display float" << std::endl;
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, render_texture);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,

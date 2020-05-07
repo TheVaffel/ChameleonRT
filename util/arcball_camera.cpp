@@ -87,14 +87,17 @@ const glm::mat4 &ArcballCamera::inv_transform() const
 }
 glm::vec3 ArcballCamera::eye() const
 {
-    return glm::vec3{inv_camera * glm::vec4{0, 0, 0, 1}};
+  std::cout << "Eye: " << glm::to_string(glm::vec3{inv_camera * glm::vec4{0, 0, 0, 1}}) << std::endl;
+    return glm::vec3{inv_camera * glm::vec4{0, 0, 0, -1}};
 }
 glm::vec3 ArcballCamera::dir() const
 {
+  std::cout << "Dir: " << glm::to_string(glm::normalize(glm::vec3{inv_camera * glm::vec4{0, 0, -1, 0}})) << std::endl;
     return glm::normalize(glm::vec3{inv_camera * glm::vec4{0, 0, -1, 0}});
 }
 glm::vec3 ArcballCamera::up() const
 {
+  std::cout << "Up: " << glm::to_string(glm::normalize(glm::vec3{inv_camera * glm::vec4{0, 1, 0, 0}})) << std::endl;
     return glm::normalize(glm::vec3{inv_camera * glm::vec4{0, 1, 0, 0}});
 }
 glm::vec3 ArcballCamera::center() const

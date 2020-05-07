@@ -30,14 +30,14 @@ glm::mat4 getInterpolatedView(const CameraCheckpoint& cc1,
     float coeff = float(t - cc1.t) / float(cc2.t - cc1.t);
     CameraCheckpoint cc;
     cc.point = coeff * cc2.point + (1 - coeff) * cc1.point;
-    cc.dir = glm::normalize(coeff * cc2.dir + (1 - coeff) * cc1.dir);
+    cc.dir = -glm::normalize(coeff * cc2.dir + (1 - coeff) * cc1.dir);
 
     glm::vec3 up(0.0f, 1.0f, 0.0f);
     glm::vec3 x_axis = glm::normalize(glm::cross(cc.dir, up));
     glm::vec3 y_axis = glm::normalize(glm::cross(x_axis, cc.dir));
 
     glm::mat3 rotation = glm::transpose(glm::mat3(x_axis, y_axis, cc.dir));
-    glm::mat4 transform = glm::mat4(rotation) * glm::translate(cc.point);
+    glm::mat4 transform = glm::mat4(rotation) * glm::translate(cc.point) ;
     return transform;
 }
 
