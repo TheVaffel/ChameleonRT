@@ -22,6 +22,18 @@
 #include "pbrtParser/Scene.h"
 #endif
 
+QuadLight createLight(glm::vec3 pos, glm::vec3 normal,
+		      float size, float intensity) {
+  QuadLight ql;
+  ql.emission = glm::vec4(intensity);
+  ql.normal = glm::vec4(glm::normalize(normal), 0);
+  ql.position = glm::vec4(pos, 0);
+  ortho_basis(ql.v_x, ql.v_y, glm::vec3(ql.normal));
+  ql.width = size;
+  ql.height = size;
+  return ql;
+}
+
 struct VertIdxLess {
     bool operator()(const glm::uvec3 &a, const glm::uvec3 &b) const
     {
@@ -358,18 +370,25 @@ void Scene::load_gltf(const std::string &fname)
     // Does GLTF have lights in the file? If one is missing we should generate one,
     // otherwise we can load them
     std::cout << "Generating light for GLTF scene\n";
-    std::cout << "Number of lights from before: " << lights.size() << std::endl;
+    
     QuadLight light;
+    /*
     light.emission = glm::vec4(20.f);
     light.normal = glm::vec4(glm::normalize(glm::vec3(0.0, -0.8, 0.0)), 0);
     
-    light.position = -2.4f * light.normal + glm::vec4(1.0, 0.0, 3.0, 0.0);
+    light.position = -2.5f * light.normal + glm::vec4(0.0, 0.0, 0.0, 0.0);
 
-    std::cout << "Light position = " << light.position.x << ", " << light.position.y << ", " << light.position.z << std::endl;
-    
+        
     ortho_basis(light.v_x, light.v_y, glm::vec3(light.normal));
-    light.width = 2.f;
-    light.height = 2.f;
+    light.width = 12.f;
+    light.height = 12.f; */
+
+    light = createLight(glm::vec3(0.0, 2.5f, 0.0), glm::vec3(0.0, -1.0, 0.0),
+			2.0f, 20.0f);
+    
+    
+    std::cout << "Light position = " << light.position.x << ", " << light.position.y << ", " << light.position.z << std::endl;
+
     lights.push_back(light);
 }
 

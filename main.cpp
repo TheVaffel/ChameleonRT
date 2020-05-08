@@ -219,7 +219,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     int start_index = 0;
 
     bool doing_path = false;
-    std::vector<glm::mat4> path_views;
+    
+    std::vector<TimeStampState> time_states;
     
     for (size_t i = 1; i < args.size(); ++i) {
         if (args[i] == "-eye") {
@@ -247,7 +248,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
         } else if (args[i] == "-path") {
 	    path_file = args[++i];
 	    doing_path = true;
-	    path_views = getPath(path_file);
+	    time_states = getTimeStampStates(path_file);
 	} else if (args[i] == "-output") {
 	  output_prefix = args[++i];
 	} else if (args[i] == "-start") {
@@ -428,10 +429,14 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	float r = 5.0f;
 
 	if (doing_path) {
-	    if(count >= path_views.size()) {
+	  if(count >= time_states.size()) { 
 		return;
 	    }
-	    camera.setTransform(path_views[count]);
+	    camera.setTransform(time_states[count].cam_mat);
+	    if(time_states[count].light_size >= 0) {
+	      renderer->set_scene_light(time_states[count].light_pos,
+					time_states[count].light_size);
+	    }
 	} else {
 	    camera.setTrans(glm::vec3(r * sin(count / 50.f), -2.50f, 0.0f));
 	    camera.setDir(glm::vec3(1.0f, 0.0f, 0.0f));

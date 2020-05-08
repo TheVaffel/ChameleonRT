@@ -21,6 +21,8 @@ struct RenderBackend {
     // TODO Probably should take the scene through a shared_ptr
     virtual void set_scene(const Scene &scene) = 0;
 
+  virtual void set_scene_light(glm::vec3 pos, float size) = 0;
+
     // Returns the rays per-second achieved, or -1 if this is not tracked
     virtual RenderStats render(const glm::vec3 &pos,
                                const glm::vec3 &dir,

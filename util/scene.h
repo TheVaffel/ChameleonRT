@@ -8,6 +8,8 @@
 #include "material.h"
 #include "mesh.h"
 
+#include <glm/glm.hpp>
+
 struct Scene {
     std::vector<Mesh> meshes;
     std::vector<Instance> instances;
@@ -40,3 +42,6 @@ private:
 
     void validate_materials();
 };
+
+QuadLight createLight(glm::vec3 pos, glm::vec3 normal,
+		      float size, float intensity);

@@ -253,6 +253,32 @@ void RenderOptiX::set_scene(const Scene &scene)
     build_raytracing_pipeline();
 }
 
+void RenderOptiX::set_scene_light(glm::vec3 pos, float size) {
+
+  QuadLight ql = createLight(pos, glm::vec3(0.0, -1.0, 0.0),
+			     size, 20.0f);
+  
+  // this->light_params.upload(scene.lights);
+
+  // Take a wild guess on the number of lights in the scene
+  size_t buf_size = light_params.size();
+  size_t num_lights = buf_size / sizeof(QuadLight);
+
+  CUdeviceptr ptr = light_params.device_ptr();
+
+  ptr += (num_lights - 1) * sizeof(QuadLight);
+
+  CHECK_CUDA(cudaMemcpy((void*)ptr, &ql, sizeof(QuadLight), cudaMemcpyHostToDevice));
+
+  // We'll see if this is necessary
+  /* RayGenParams &params =
+    shader_table.get_shader_params<RayGenParams>("perspective_camera");
+  params.materials = mat_params.device_ptr();
+  params.lights = light_params.device_ptr();
+  params.num_lights = light_params.size() / sizeof(QuadLight); */
+  
+}
+
 void RenderOptiX::build_raytracing_pipeline()
 {
     // Setup the OptiX Module (DXR equivalent is the Shader Library)
