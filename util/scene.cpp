@@ -372,17 +372,7 @@ void Scene::load_gltf(const std::string &fname)
     std::cout << "Generating light for GLTF scene\n";
     
     QuadLight light;
-    /*
-    light.emission = glm::vec4(20.f);
-    light.normal = glm::vec4(glm::normalize(glm::vec3(0.0, -0.8, 0.0)), 0);
     
-    light.position = -2.5f * light.normal + glm::vec4(0.0, 0.0, 0.0, 0.0);
-
-        
-    ortho_basis(light.v_x, light.v_y, glm::vec3(light.normal));
-    light.width = 12.f;
-    light.height = 12.f; */
-
     light = createLight(glm::vec3(0.0, 2.5f, 0.0), glm::vec3(0.0, -1.0, 0.0),
 			2.0f, 20.0f);
     

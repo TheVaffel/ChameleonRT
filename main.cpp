@@ -253,6 +253,10 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	  output_prefix = args[++i];
 	} else if (args[i] == "-start") {
 	  start_index = std::stoi(args[++i]);
+	} else if (args[i] == "-width") {
+	  win_width = std::stoi(args[++i]);
+	} else if (args[i] == "-height") {
+	  win_height = std::stoi(args[++i]);
 	}
 #if ENABLE_OSPRAY
         else if (args[i] == "-ospray") {
