@@ -78,18 +78,6 @@ int win_height = 720;
 
 void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *display);
 
-/* void follow_path(std::string& pathfilename) {
-    std::vector<glm::mat4> views = getPath(pathfilename);
-
-    ArcballCamera cam(glm::vec3(0.f, 0.f, 0.f),
-		      glm::vec3(1.f, 0.f, 0.f),
-		      glm::vec3(0.f, 1.f, 0.f));
-    
-    for(int i = 0; i < views.size(); i++) {
-	cam.setTransform(views[i]);
-    }
-    } */
-
 glm::vec2 transform_mouse(glm::vec2 in)
 {
     return glm::vec2(in.x * 2.f / win_width - 1.f, 1.f - 2.f * in.y / win_height);

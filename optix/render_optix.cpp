@@ -80,7 +80,7 @@ std::string RenderOptiX::name()
 
 void RenderOptiX::initialize(const int fb_width, const int fb_height)
 {
-    frame_id = 0;
+  // frame_id = 0;
     width = fb_width;
     height = fb_height;
     img.resize(3 * fb_width * fb_height);
@@ -115,7 +115,7 @@ void RenderOptiX::initialize(const int fb_width, const int fb_height)
 
 void RenderOptiX::set_scene(const Scene &scene)
 {
-    frame_id = 0;
+  // frame_id = 0;
 
     // TODO: We can actually run all these uploads and BVH builds in parallel
     // using cudaMemcpyAsync, and the builds in parallel on multiple streams.
@@ -256,7 +256,7 @@ void RenderOptiX::set_scene(const Scene &scene)
 void RenderOptiX::set_scene_light(glm::vec3 pos, float size) {
 
   QuadLight ql = createLight(pos, glm::vec3(0.0, -1.0, 0.0),
-			     size, 20.0f);
+			     size, 40.0f);
   
   // this->light_params.upload(scene.lights);
 
@@ -395,9 +395,9 @@ RenderStats RenderOptiX::render(const glm::vec3 &pos,
     using namespace std::chrono;
     RenderStats stats;
 
-    if (camera_changed) {
+    /* if (camera_changed) {
         frame_id = 0;
-    }
+	} */
 
     update_view_parameters(pos, dir, up, fovy);
 

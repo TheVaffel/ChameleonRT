@@ -374,7 +374,7 @@ void Scene::load_gltf(const std::string &fname)
     QuadLight light;
     
     light = createLight(glm::vec3(0.0, 2.5f, 0.0), glm::vec3(0.0, -1.0, 0.0),
-			2.0f, 20.0f);
+			2.0f, 40.0f);
     
     
     std::cout << "Light position = " << light.position.x << ", " << light.position.y << ", " << light.position.z << std::endl;
