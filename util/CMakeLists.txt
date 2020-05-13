@@ -1,4 +1,7 @@
-add_subdirectory(display)
+
+if(WITH_DISPLAY)
+  add_subdirectory(display)
+endif()
 
 add_library(util
     arcball_camera.cpp
@@ -15,15 +18,19 @@ set_target_properties(util PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON)
 
-target_include_directories(util PUBLIC
+  target_include_directories(util PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-    $<BUILD_INTERFACE:${SDL2_INCLUDE_DIR}>
     $<BUILD_INTERFACE:${GLM_INCLUDE_DIRS}>)
+  
+  if(WITH_DISPLAY)
+target_include_directories(util PUBLIC
+    $<BUILD_INTERFACE:${SDL2_INCLUDE_DIR}>)
 
-target_link_libraries(util PUBLIC
-    imgui
-    ${SDL2_LIBRARY})
-
+    target_link_libraries(util PUBLIC
+      imgui
+      ${SDL2_LIBRARY})
+  endif()
+  
 find_package(pbrtParser)
 if (${pbrtParser_FOUND})
     target_link_libraries(util PUBLIC pbrtParser)

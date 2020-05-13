@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(chameleonrt)
 
+option(NO_DISPLAY "NO_DISPLAY" OFF)
+
 if (NOT WIN32)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -O3")
 endif()
@@ -12,9 +14,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(Threads REQUIRED)
 find_package(glm REQUIRED)
-find_package(SDL2 REQUIRED)
 
-add_subdirectory(imgui)
+if(NO_DISPLAY)
+  message("Display not included")
+else()
+  set(CMAKE_CXX_FLAGS "-DWITH_DISPLAY")
+  find_package(SDL2 REQUIRED)
+  add_subdirectory(imgui)
+  message("Display included")
+endif()
+
 add_subdirectory(util)
 
 option(ENABLE_OSPRAY "Build the OSPRay rendering backend. Requires OSPRay" OFF)
@@ -67,10 +76,17 @@ set_target_properties(chameleonrt PROPERTIES
 target_include_directories(chameleonrt PRIVATE "~/pseudoroot/include" "~/SDK/nlohmann/json/include")
 
 target_link_libraries(chameleonrt PUBLIC
-    util
+  util
+  OpenImageIO
+  )
+
+if (NOT NO_DISPLAY)
+target_link_libraries(chameleonrt PUBLIC
     display
-    OpenImageIO
-   )
+    )
+endif()
+
+  
 
 if (ENABLE_OSPRAY)
 	target_link_libraries(chameleonrt PUBLIC render_ospray)

@@ -64,10 +64,13 @@ RenderOptiX::RenderOptiX(bool native_display) : native_display(native_display)
 
 RenderOptiX::~RenderOptiX()
 {
+#ifdef WITH_DISPLAY
     if (native_display) {
         cudaGraphicsUnregisterResource(cu_display_texture);
         glDeleteTextures(1, &display_texture);
     }
+#endif // WITH_DISPLAY
+    
     optixPipelineDestroy(pipeline);
     optixDeviceContextDestroy(device);
     cudaStreamDestroy(cuda_stream);
@@ -94,6 +97,7 @@ void RenderOptiX::initialize(const int fb_width, const int fb_height)
     ray_counts.resize(ray_stats_buffer.size() / sizeof(uint16_t), 0);
 #endif
 
+#ifdef WITH_DISPLAY
     if (native_display) {
         if (display_texture != -1) {
             cudaGraphicsUnregisterResource(cu_display_texture);
@@ -111,6 +115,8 @@ void RenderOptiX::initialize(const int fb_width, const int fb_height)
         CHECK_CUDA(cudaGraphicsGLRegisterImage(
             &cu_display_texture, display_texture, GL_TEXTURE_2D, 0));
     }
+#endif // WITH_DISPLAY
+    
 }
 
 void RenderOptiX::set_scene(const Scene &scene)
@@ -423,6 +429,7 @@ RenderStats RenderOptiX::render(const glm::vec3 &pos,
     const bool need_readback = !native_display || readback_framebuffer;
 #endif
 
+#ifdef WITH_DISPLAY
     if (native_display) {
         CHECK_CUDA(cudaGraphicsMapResources(1, &cu_display_texture));
 
@@ -440,6 +447,7 @@ RenderStats RenderOptiX::render(const glm::vec3 &pos,
 
         CHECK_CUDA(cudaGraphicsUnmapResources(1, &cu_display_texture));
     }
+#endif // WITH_DISPLAY
 
     if (need_readback) {
         framebuffer.download(img);

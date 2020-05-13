@@ -7,16 +7,22 @@
 #include <vector>
 #include <iomanip>
 
+#ifdef WITH_DISPLAY
 #include <SDL.h>
-#include "arcball_camera.h"
 #include "imgui.h"
+#endif // WITH_DISPLAY
+
+#include "arcball_camera.h"
 #include "scene.h"
 #include "stb_image_write.h"
 #include "tiny_obj_loader.h"
 #include "util.h"
+
+#ifdef WITH_DISPLAY
 #include "util/display/display.h"
 #include "util/display/gldisplay.h"
 #include "util/display/imgui_impl_sdl.h"
+#endif // WITH_DISPLAY
 
 #include <OpenImageIO/imageio.h>
 
@@ -76,7 +82,13 @@ const std::string USAGE =
 int win_width = 1280;
 int win_height = 720;
 
+#ifdef WITH_DISPLAY
 void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *display);
+#else // WITH_DISPLAY
+void run_app(const std::vector<std::string> &args);
+#endif // WITH_DISPLAY
+
+
 
 glm::vec2 transform_mouse(glm::vec2 in)
 {
@@ -91,10 +103,11 @@ int main(int argc, const char **argv)
     });
 
     if (argc < 3 || fnd_help != args.end()) {
-        std::cout << USAGE;
+      std::cout << USAGE << std::endl;
         return 1;
     }
 
+#ifdef WITH_DISPLAY    
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         std::cerr << "Failed to init SDL: " << SDL_GetError() << "\n";
         return -1;
@@ -103,6 +116,7 @@ int main(int argc, const char **argv)
     // Determine which display frontend we should use
     std::string display_frontend = "gl";
     uint32_t window_flags = SDL_WINDOW_RESIZABLE;
+#endif // WITH_DISPLAY
 
     for (size_t i = 0; i < args.size(); ++i) {	
         if (args[i] == "-img") {
@@ -126,6 +140,7 @@ int main(int argc, const char **argv)
     }
     
 
+#ifdef WITH_DISPLAY
 	if (display_frontend == "gl") {
 	  // std::cout << "Display frontend: gl" << std::endl;
 	    window_flags = SDL_WINDOW_OPENGL;
@@ -176,11 +191,21 @@ int main(int argc, const char **argv)
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 
+#else // WITH_DISPLAY
+	run_app(args);
+#endif // WITH_DISPLAY
+	
 	return 0;
 }
 
+#ifdef WITH_DISPLAY
 void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *display)
+#else // WITH_DISPLAY
+  void run_app(const std::vector<std::string> &args)
+#endif // WITH_DISPLAY
 {
+
+#ifdef WITH_DISPLAY
     ImGuiIO &io = ImGui::GetIO();
 
 #ifdef ENABLE_DXR
@@ -191,7 +216,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 #endif
     GLDisplay *gl_display = dynamic_cast<GLDisplay *>(display);
     bool display_is_native = false;
-
+#endif // WITH_DISPLAY
+    
     std::string scene_file;
     std::unique_ptr<RenderBackend> renderer = nullptr;
     bool got_camera_args = false;
@@ -254,8 +280,12 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 #endif
 #if ENABLE_OPTIX
         else if (args[i] == "-optix") {
+#if WITH_DISPLAY
             display_is_native = gl_display != nullptr;
             renderer = std::make_unique<RenderOptiX>(display_is_native);
+#else // WITH_DISPLAY
+	    renderer = std::make_unique<RenderOptiX>(false);
+#endif // WITH_DISPLAY
             backend_arg = args[i];
         }
 #endif
@@ -304,7 +334,10 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
         std::exit(1);
     }
 
+#if WITH_DISPLAY
     display->resize(win_width, win_height);
+#endif // WITH_DISPLAY
+    
     renderer->initialize(win_width, win_height);
 
     std::string scene_info;
@@ -341,9 +374,12 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 
     const std::string rt_backend = renderer->name();
     const std::string cpu_brand = get_cpu_brand();
-    const std::string gpu_brand = display->gpu_brand();
     const std::string image_output = "chameleonrt.png";
+
+#ifdef WITH_DISPLAY
+    const std::string gpu_brand = display->gpu_brand();
     const std::string display_frontend = display->name();
+#endif // WITH_DISPLAY
 
     size_t count = 0;
     size_t frame_id = 0;
@@ -354,6 +390,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     bool camera_changed = true;
     bool save_image = false;
     while (!done) {
+
+#ifdef WITH_DISPLAY
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
 	    
@@ -417,6 +455,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
                 renderer->initialize(win_width, win_height);
             }
         }
+#endif // WITH_DISPLAY
 
 	float r = 5.0f;
 
@@ -504,6 +543,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
             rays_per_second += stats.rays_per_second;
         }
 
+#ifdef WITH_DISPLAY
         display->new_frame();
 
         ImGui_ImplSDL2_NewFrame(window);
@@ -559,5 +599,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
         } else {
             display->display(renderer->img);
         }
+#endif // WITH_DISPLAY
     }
+
+    std::cout << "Exited loop - done" << std::endl;
 }

@@ -1,7 +1,11 @@
 #pragma once
 
 #include <optix.h>
+
+#ifdef WITH_DISPLAY
 #include "display/gl_core_4_5.h"
+#endif // WITH_DISPLAY
+
 #include "optix_utils.h"
 #include "render_backend.h"
 
@@ -27,8 +31,11 @@ struct RenderOptiX : RenderBackend {
     uint32_t frame_id = 0;
 
     bool native_display = false;
+
+#ifdef WITH_DISPLAY
     GLuint display_texture = -1;
     cudaGraphicsResource_t cu_display_texture;
+#endif // WITH_DISPLAY
 
 #ifdef REPORT_RAY_STATS
     std::vector<uint16_t> ray_counts;
