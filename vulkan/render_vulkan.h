@@ -8,18 +8,13 @@
 #include "vulkanrt_utils.h"
 
 struct HitGroupParams {
-    uint32_t vert_buf = 0;
-    uint32_t idx_buf = 0;
-    uint32_t normal_buf = 0;
-    uint32_t uv_buf = 0;
+    uint64_t vert_buf = 0;
+    uint64_t idx_buf = 0;
+    uint64_t normal_buf = 0;
+    uint64_t uv_buf = 0;
+    uint32_t num_normals = 0;
+    uint32_t num_uvs = 0;
     uint32_t material_id = 0;
-};
-
-struct GeomBufIndices {
-    uint32_t vert_buf = 0;
-    uint32_t idx_buf = 0;
-    uint32_t normal_buf = 0;
-    uint32_t uv_buf = 0;
 };
 
 struct RenderVulkan : RenderBackend {
@@ -37,7 +32,6 @@ struct RenderVulkan : RenderBackend {
 
     std::vector<std::unique_ptr<vkrt::TriangleMesh>> meshes;
     std::unique_ptr<vkrt::TopLevelBVH> scene_bvh;
-    std::vector<std::vector<GeomBufIndices>> buf_indices;
     size_t total_geom = 0;
 
     std::vector<std::shared_ptr<vkrt::Texture2D>> textures;
@@ -53,16 +47,11 @@ struct RenderVulkan : RenderBackend {
     vkrt::RTPipeline rt_pipeline;
     VkPipelineLayout pipeline_layout = VK_NULL_HANDLE;
     VkDescriptorSetLayout desc_layout = VK_NULL_HANDLE;
-    VkDescriptorSetLayout buffer_desc_layout = VK_NULL_HANDLE;
     VkDescriptorSetLayout textures_desc_layout = VK_NULL_HANDLE;
 
     VkDescriptorPool desc_pool = VK_NULL_HANDLE;
     // We need a set per varying size array of things we're sending
     VkDescriptorSet desc_set = VK_NULL_HANDLE;
-    VkDescriptorSet index_desc_set = VK_NULL_HANDLE;
-    VkDescriptorSet vert_desc_set = VK_NULL_HANDLE;
-    VkDescriptorSet normals_desc_set = VK_NULL_HANDLE;
-    VkDescriptorSet uv_desc_set = VK_NULL_HANDLE;
     VkDescriptorSet textures_desc_set = VK_NULL_HANDLE;
 
     vkrt::ShaderBindingTable shader_table;
