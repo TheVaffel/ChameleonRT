@@ -1,5 +1,5 @@
 
-if(WITH_DISPLAY)
+if(NOT NO_DISPLAY)
   add_subdirectory(display)
 endif()
 
@@ -22,7 +22,7 @@ set_target_properties(util PROPERTIES
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
     $<BUILD_INTERFACE:${GLM_INCLUDE_DIRS}>)
   
-  if(WITH_DISPLAY)
+  if(NOT NO_DISPLAY)
 target_include_directories(util PUBLIC
     $<BUILD_INTERFACE:${SDL2_INCLUDE_DIR}>)
 

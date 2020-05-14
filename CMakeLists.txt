@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(chameleonrt)
 
-option(NO_DISPLAY "NO_DISPLAY" OFF)
+option(NO_DISPLAY "NO_DISPLAY")
 
 if (NOT WIN32)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -O3")

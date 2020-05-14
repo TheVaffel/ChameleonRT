@@ -521,15 +521,15 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
                            renderer->img.data(),
                            4 * win_width); */
 
-	    OpenImageIO::ImageOutput *out = OpenImageIO::ImageOutput::create(img_name);
+	    std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(img_name);
 	    if(!out) {
 	      std::cerr << "Could not create output file " << img_name << ", exiting" << std::endl;
 	      exit(-1);
 	    }
 	    
-	    OpenImageIO::ImageSpec spec(win_width, win_height, 3, OpenImageIO::TypeDesc::FLOAT);
+	    OIIO::ImageSpec spec(win_width, win_height, 3, OIIO::TypeDesc::FLOAT);
 	    out->open(img_name, spec);
-	    out->write_image(OpenImageIO::TypeDesc::FLOAT, renderer->img.data());
+	    out->write_image(OIIO::TypeDesc::FLOAT, renderer->img.data());
 	    out->close();
 	    
 	    std::cout << "Saved output to " << img_name << std::endl;
