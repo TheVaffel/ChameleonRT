@@ -15,6 +15,10 @@
 #define NUM_RAY_TYPES 2
 #define MAX_PATH_DEPTH 4
 
+#define SAMPLES_PER_PIXEL 1
+#define DEMODULATE_ALBEDO true
+
+
 #ifdef __CUDA_ARCH__
 typedef unsigned long long uint64_t;
 typedef unsigned int uint32_t;

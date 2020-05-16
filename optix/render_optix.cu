@@ -126,7 +126,6 @@ __device__ float3 sample_direct_light(const DisneyMaterial &mat, const float3 &h
     return illum;
 }
 
-#define SAMPLES_PER_PIXEL 1
 
 extern "C" __global__ void __raygen__perspective_camera() {
     const RayGenParams &params = get_shader_params<RayGenParams>();
@@ -237,11 +236,8 @@ extern "C" __global__ void __raygen__perspective_camera() {
             clamp(linear_to_srgb(illum.x) * 255.f, 0.f, 255.f),
             clamp(linear_to_srgb(illum.y) * 255.f, 0.f, 255.f),
             clamp(linear_to_srgb(illum.z) * 255.f, 0.f, 255.f), 255); */
-    
-    /* launch_params.framebuffer[pixel_idx] =
-      make_float3(clamp(linear_to_srgb(accum_sum.x), 0.f, 1.f),
-		  clamp(linear_to_srgb(accum_sum.y), 0.f, 1.f),
-		  clamp(linear_to_srgb(accum_sum.z), 0.f, 1.f)); */
+
+#if DEMODULATE_ALBEDO
     
     float3 demodulated_illum =
       make_float3(albedo.x > 1e-8 ? accum_sum.x / albedo.x : 0.0f,
@@ -251,6 +247,15 @@ extern "C" __global__ void __raygen__perspective_camera() {
       make_float3(clamp(linear_to_srgb(demodulated_illum.x), 0.f, 1.f),
 		  clamp(linear_to_srgb(demodulated_illum.y), 0.f, 1.f),
 		  clamp(linear_to_srgb(demodulated_illum.z), 0.f, 1.f));
+    
+#else // DEMODULATE_ALBEDO
+    
+    launch_params.framebuffer[pixel_idx] =
+      make_float3(clamp(linear_to_srgb(accum_sum.x), 0.f, 1.f),
+		  clamp(linear_to_srgb(accum_sum.y), 0.f, 1.f),
+		  clamp(linear_to_srgb(accum_sum.z), 0.f, 1.f));
+
+#endif // DEMODULATE_ALBEDO
     
 #ifdef REPORT_RAY_STATS
     launch_params.ray_stats_buffer[pixel_idx] = ray_count;
