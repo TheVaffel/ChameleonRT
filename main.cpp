@@ -32,7 +32,10 @@
 #include "ospray/render_ospray.h"
 #endif
 #if ENABLE_OPTIX
+
 #include "optix/render_optix.h"
+#include "optix/types.h"
+
 #endif
 #if ENABLE_EMBREE
 #include "embree/render_embree.h"
@@ -354,8 +357,14 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
            << "# Materials: " << scene.materials.size() << "\n"
            << "# Textures: " << scene.textures.size() << "\n"
            << "# Lights: " << scene.lights.size() << "\n"
-           << "# Cameras: " << scene.cameras.size();
-
+           << "# Cameras: " << scene.cameras.size() << "\n"
+#ifdef ENABLE_OPTIX
+	   << "Render type: " << (DEMODULATE_ALBEDO ? "Without albedo" : "With albedo") << "\n"
+	   << "Samples per pixel: " << SAMPLES_PER_PIXEL << "\n"
+#endif
+	  ;
+	
+	
         scene_info = ss.str();
         std::cout << scene_info << "\n";
 
