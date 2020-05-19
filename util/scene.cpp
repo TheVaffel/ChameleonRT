@@ -275,7 +275,7 @@ void Scene::load_gltf(const std::string &fname)
                 }
             }
 
-#if 0
+#if 1
             fnd = p.attributes.find("NORMAL");
             if (fnd != p.attributes.end()) {
                 Accessor<glm::vec3> normal_accessor(model.accessors[fnd->second], model);
