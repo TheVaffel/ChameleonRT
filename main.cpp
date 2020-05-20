@@ -80,6 +80,7 @@ const std::string USAGE =
     "\t-path <path_file>      Run path mode, recording a path defined in <path_file>\n"
   "\t-output <output>       Output files with <output> as prefix\n"
   "\t-start <start_index>   Output index of the first frame\n"
+  "\t-interval <t0> <t1>    Only consider timestamps between t0 and t1 (inclusive) of path\n"
     "\n";
 
 int win_width = 1280;
@@ -235,6 +236,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     std::string output_prefix = "frame";
     int start_index = 0;
 
+    int t0 = -1, t1 = -1;
+    
     bool doing_path = false;
     
     std::vector<TimeStampState> time_states;
@@ -270,6 +273,9 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	  output_prefix = args[++i];
 	} else if (args[i] == "-start") {
 	  start_index = std::stoi(args[++i]);
+	} else if (args[i] == "-interval") {
+	  t0 = std::stoi(args[++i]);
+	  t1 = std::stoi(args[++i]);
 	} else if (args[i] == "-width") {
 	  win_width = std::stoi(args[++i]);
 	} else if (args[i] == "-height") {
@@ -390,7 +396,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
     const std::string display_frontend = display->name();
 #endif // WITH_DISPLAY
 
-    size_t count = 0;
+    size_t count = t0 >= 0 ? t0 : 0;
     size_t frame_id = 0;
     float render_time = 0.f;
     float rays_per_second = 0.f;
@@ -469,7 +475,7 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	float r = 5.0f;
 
 	if (doing_path) {
-	  if(count >= time_states.size()) { 
+	  if(count >= time_states.size() || (t1 >= 0 && count > (size_t)t1)) { 
 		return;
 	    }
 	    camera.setTransform(time_states[count].cam_mat);
