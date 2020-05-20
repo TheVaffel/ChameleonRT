@@ -297,7 +297,7 @@ extern "C" __global__ void __closesthit__closest_hit() {
       const float3 n2 = params.normal_buffer[indices.y];
       const float3 n3 = params.normal_buffer[indices.z];
       
-      normal = n1 + n2 + n3; // Normalized later
+      normal = n1 * (1.f - bary.x - bary.y) + n2 * bary.x + n3 * bary.y; // Normalized later
     } else {
       
       const float3 v0 = params.vertex_buffer[indices.x];
