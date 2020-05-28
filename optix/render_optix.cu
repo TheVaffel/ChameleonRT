@@ -244,9 +244,9 @@ extern "C" __global__ void __raygen__perspective_camera() {
 		  albedo.y > 1e-8 ? accum_sum.y / albedo.y : 0.0f,
 		  albedo.z > 1e-8 ? accum_sum.z / albedo.z : 0.0f);
     launch_params.framebuffer[pixel_idx] =
-      make_float3(clamp(linear_to_srgb(demodulated_illum.x), 0.f, 1.f),
-		  clamp(linear_to_srgb(demodulated_illum.y), 0.f, 1.f),
-		  clamp(linear_to_srgb(demodulated_illum.z), 0.f, 1.f));
+      make_float3(clamp(demodulated_illum.x, 0.f, 1.f),
+		  clamp(demodulated_illum.y, 0.f, 1.f),
+		  clamp(demodulated_illum.z, 0.f, 1.f));
     
 #else // DEMODULATE_ALBEDO
     
