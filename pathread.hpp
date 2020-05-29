@@ -180,32 +180,6 @@ std::vector<TimeStampState> getTimeStampStates(const std::string& str) {
 
     
     
-    /* int last_light = -1;
-    for(unsigned int i = 0; i < cps.size(); i++) {
-      if(cps[i].light_size >= 0) {
-	if(last_light  == -1) {
-	  for(unsigned int j = 0; j < i; j++) {
-	    cps[j].light_size = cps[i].light_size;
-	    cps[j].light_pos = cps[i].light_pos;
-	  }
-	} else {
-	  for(unsigned int j = last_light + 1; j < i; j++) {
-	    float coeff = float(cps[j].t - cps[last_light].t) / float(cps[i].t - cps[last_light].t);
-	    cps[j].light_size = coeff * cps[i].light_size + (1 - coeff) * cps[last_light].light_size;
-	    cps[j].light_pos = coeff * cps[i].light_pos + (1 - coeff) * cps[last_light].light_pos;
-	  }
-	}
-	last_light = i;
-      }
-    }
-
-    if(last_light != -1 && last_light != int(cps.size()) - 1) {
-      for(unsigned int i = last_light + 1; i < cps.size(); i++) {
-	cps[i].light_size = cps[last_light].light_size;
-	cps[i].light_pos = cps[last_light].light_pos;
-      }
-      } */
-
     extrapolateFeature(cps,
 		       getLightPosition,
 		       hasLightPosition);
@@ -216,11 +190,6 @@ std::vector<TimeStampState> getTimeStampStates(const std::string& str) {
 		       getLightIntensity,
 		       hasLightIntensity);
 
-    std::cout << "CPS size = " << cps.size() << std::endl;
-    for(int i = 0; i < cps.size(); i++) {
-      std::cout << "Light intensity: " << getLightIntensity(cps[i]) << std::endl;
-    }
-    
     std::vector<TimeStampState> states;
     int t = cps[0].t;
     size_t current_cp = 0;
