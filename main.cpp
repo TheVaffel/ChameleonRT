@@ -481,7 +481,8 @@ void run_app(const std::vector<std::string> &args, SDL_Window *window, Display *
 	    camera.setTransform(time_states[count].cam_mat);
 	    if(time_states[count].light_size >= 0) {
 	      renderer->set_scene_light(time_states[count].light_pos,
-					time_states[count].light_size);
+					time_states[count].light_size,
+					time_states[count].light_intensity);
 	    }
 	} else {
 	    camera.setTrans(glm::vec3(r * sin(count / 50.f), -2.50f, 0.0f));

@@ -259,10 +259,10 @@ void RenderOptiX::set_scene(const Scene &scene)
     build_raytracing_pipeline();
 }
 
-void RenderOptiX::set_scene_light(glm::vec3 pos, float size) {
+void RenderOptiX::set_scene_light(glm::vec3 pos, float size, float intensity) {
 
   QuadLight ql = createLight(pos, glm::vec3(0.0, -1.0, 0.0),
-			     size, 40.0f);
+			     size, intensity);
   
   // this->light_params.upload(scene.lights);
 
